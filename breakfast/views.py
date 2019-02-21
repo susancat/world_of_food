@@ -1,5 +1,10 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 
-def index(request):
-    return HttpResponse("Start your day the global way!")
+# Create your views here.
+def home(request):
+    return render(request, 'breakfast/home.html', {})
+   
+
+   
+
