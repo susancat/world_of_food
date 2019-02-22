@@ -1,3 +1,4 @@
+
 """
 Django settings for World_Of_Food project.
 
@@ -133,3 +134,4 @@ STATIC_URL = '/static/'
 #Media files
 MEDIA_ROOT= MEDIA_DIR
 MEDIA_URL= '/media/'
+

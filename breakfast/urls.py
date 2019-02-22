@@ -1,3 +1,4 @@
+
 from django.conf.urls import url
 from breakfast import views
 
@@ -12,4 +13,5 @@ urlpatterns=[
         views.continent_page, name='continent_page'),
     url(r'^continents/(?P<continent_name_slug>[\w\-]+)/(?P<recipe_name_slug>[\w\-]+)',
         views.recipe_page, name='recipe_page'),
+
 ]
