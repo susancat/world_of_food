@@ -1,0 +1,137 @@
+{% extends 'breakfast/base.html' %}
+{% load staticfiles %}
+
+{% block title_block %}
+    My Account
+{% endblock %}
+{% block body_block %}
+
+ <div class="u-large-hide ">
+    Sign in as <b>{{user.username}}</b></div>
+<div class="panel">
+    <div class="page-header">
+      <h1>
+                    My Account</h1>
+    </div>
+    <div class="success-notification">
+	   </div>
+    <form method="post" name="profile_form" id="profile_form"><div class="row">
+		{% csrf_token %}
+        <fieldset>
+        <legend class="row-title">
+                    Profile picture</legend>
+
+        <div class="settings-item">
+
+          <div id="photo">
+            <div class="ProfilePhoto"><div class="photo-selector two-column">
+
+    <div class="photo-preview left">
+      <input name="userProfilePhotoPreviewId" id="userProfilePhotoPreviewId-hidden-input" type="hidden" value="" /><img id="photo-upload-preview" src="/redesign/profile/no-profile-pic.png" />
+    </div>
+
+    <div class="upload-action-selector left">
+      <div id="photo-update-action-selector" class="select-container">
+        <div class="select-arrow"></div>
+        <div class="selected-item">
+                    Edit</div>
+        <ul class="select-items">
+          <li id="upload-new-photo" class="select-enabled">
+                    Upload a photo</li>
+          <li id="remove-photo" class="select-enabled">
+                    Remove photo</li>
+        </ul>
+      </div>
+
+      <div class="basic-upload-actions">
+        <div class="pretend-button-container">
+          <div class="pretend-submit-button Btn Btn_deemph Btn_inline">
+                   Upload new photo</div>
+          <input id="upload-file-input" class="file-input" type="file"
+                 name="photo" data-url="" />
+        </div>
+        <a href='#' id='remove-uploaded-photo-button'>
+                   Remove photo</a>
+      </div>
+
+      <div id="photo-upload-error-box">
+        </div>
+
+      <div class="accepted-photo-types">
+                  .jpg, .gif, or .png.Maximum 700K.</div>
+    </div>
+
+    <input name="removePhoto" id="remove-photo-input" type="hidden" value="false" /></div>
+
+  <input name="croppedPhotoDimensions.topLeftX" id="cropped-photo-dimensions-x1" type="hidden" value="" /><input name="croppedPhotoDimensions.topLeftY" id="cropped-photo-dimensions-y1" type="hidden" value="" /><input name="croppedPhotoDimensions.height" id="cropped-photo-dimensions-height" type="hidden" value="" /><input name="croppedPhotoDimensions.width" id="cropped-photo-dimensions-width" type="hidden" value="" /><input name="croppedPhotoDimensions.originalHeight" id="cropped-photo-dimensions-original-height" type="hidden" value="" /><input name="croppedPhotoDimensions.originalWidth" id="cropped-photo-dimensions-original-width" type="hidden" value="" /><div class="clear"></div>
+
+  <script id="photoCropBox" type="text/html">
+    <div class="photo-crop-lightbox">
+      <div class="photocrop-description">
+        Crop and drag the picture.</div>
+      <div class="body">
+        <img id="photo-upload-full-size-preview" src="" />
+      </div>
+      <div class="photocrop-call-to-action">
+        <div class="lightbox-buttons BtnPanel">
+          <a id="photocrop-lightbox-cancel" class="Btn Btn_deemph BtnPanel-btn">
+                   Cancel</a>
+          <a id="photocrop-lightbox-save" class="Btn Btn_emph BtnPanel-btn">
+                   Crop and save.</a>
+        </div>
+        <div class="clear" />
+      </div>
+    </div>
+  </script>
+
+</div></div>
+
+        </div>
+        </fieldset>
+      </div>
+
+<div class="row">
+        <fieldset>
+          <legend class="row-title">
+                  My Favourites</legend>
+			      <p>{{Favourites.recipe}}</p>
+			</div>
+			
+      <div class="row">
+        <fieldset>
+          <legend class="row-title">
+                  Contact</legend>
+
+          <ol class="settings-item">
+            <li id="user-name" class="Row">
+              <label for="profile-user-name-input" class="required">
+                  Full name</label>
+              <input name="fullName" id="profile-user-name-input" type="text" class="TextInput" /></li>
+            
+            </ol>
+        </fieldset>
+      </div>
+      <div class="row last">
+        <fieldset>
+          <legend class="row-title">
+                  Email address</legend>
+          <ol class="settings-item">
+            <li class="Row">
+              <p>
+                 {{user.email}}<br/>
+                      <a href= >Change the Email address</a></p>
+            </li>
+            </ol>
+        </fieldset>
+      </div>
+<div class="row last">
+<li>
+            <input name="identitiesToRemove" type="hidden" class="js-identitiesToRemove" value="" /><input name="submit" value="Update Profile" type="submit"
+                   class="Btn Btn_emph"
+                   onclick="if (!$('#start-date-checkbox').is(':checked')) {$('#start-date').val(null);}" />
+            <input name="cancel"
+                   value="Cancel" type="submit" class="Btn Btn_deemph"/>
+          </li>
+		  </div>
+		  
+{% endblock %}
