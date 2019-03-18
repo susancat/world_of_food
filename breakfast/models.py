@@ -70,8 +70,7 @@ class User(models.Model):
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
     picture = models.ImageField(upload_to='profile_images', blank=True)
-    recipe_name = models.ForeignKey(Favourites)
-
+    
     def __str__(self):
         return self.user.username
 
