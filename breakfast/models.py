@@ -17,19 +17,23 @@ class Continent(models.Model):
 
 
 class Recipe(models.Model):
+    text = models.CharField(max_length=12)
     recipe_name = models.CharField(max_length=128, unique=True)
     continent = models.ForeignKey(Continent)
-    description = models.TextField
-    short_description = models.TextField
-    ingredients = models.TextField
-    steps = models.TextField
+    short_description = models.CharField(max_length=1280)
+    description = models.CharField(max_length=1280)
+    ingredients = models.CharField(max_length=1280)
+    steps = models.CharField(max_length=1280)
+    keywords = models.CharField(max_length=500)
     views = models.IntegerField(default=0)
     likes = models.IntegerField(default=0)
-    image = models.ImageField
+    image = models.ImageField(upload_to='recipe_images',null=True,blank=True)
     slug = models.SlugField(unique=True)
+    continent_slug = models.SlugField()
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.recipe_name)
+        self.continent_slug = slugify(self.continent)
         super(Recipe, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -38,7 +42,7 @@ class Recipe(models.Model):
 
 class Review(models.Model):
     recipe_name = models.ForeignKey(Recipe)
-    review_text = models.TextField
+    review_text = models.CharField(max_length=1280)
     rating = models.IntegerField(default=0)
 
     def __str__(self):
@@ -55,17 +59,6 @@ class Favourites(models.Model):
     def __str__(self):
         return self.account
 
-    
-""" Laimonous reported an error here for log in creation, so User class commented
-class User(models.Model):
-    name = models.CharField(max_length=128)
-    account = models.CharField(max_length=128, unique=True)
-    email = models.EmailField(max_length=256)
-    password = models.CharField(max_length=16)
-    # I changed the field type of favourites to URL since I thought it should save a set of recipes
-    favourites = models.URLField(max_length=256)
-"""
-
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
@@ -73,4 +66,3 @@ class UserProfile(models.Model):
     
     def __str__(self):
         return self.user.username
-

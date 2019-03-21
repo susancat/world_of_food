@@ -1,16 +1,54 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.core.urlresolvers import reverse
-from breakfast.models import Continent, Recipe, Favourites, Review
+from breakfast.models import Continent, Recipe, Favourites, Review, UserProfile
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import PasswordChangeForm
+from registration.backends.simple.views import RegistrationView
 from breakfast.forms import UserForm,UserProfileForm,ContinentForm,RecipeForm
 from django.contrib.auth.decorators import login_required
-# from registration.backends.simple.views import RegistrationView
+from django.contrib import messages
+from datetime import datetime
+
+def get_server_side_cookie(request, cookie, default_val=None):
+    val = request.session.get(cookie)
+    if not val:
+        val = default_val
+    return val
+
+def visitor_cookie_handler(request):
+    visits = int(get_server_side_cookie(request, 'visits', '1'))
+
+    last_visit_cookie = get_server_side_cookie(request, 'last_visit', str(datetime.now()) )
+
+    last_visit_time = datetime.strptime(last_visit_cookie[:-7], "%Y-%m-%d %H:%M:%S")
+    
+    if (datetime.now() - last_visit_time).seconds > 0:
+        visits = visits + 1
+
+        request.session['last_visit'] = str(datetime.now())
+    else:
+        visits = 1
+        request.session['last_visit'] = last_visit_cookie
+    
+    request.session['visits'] = visits
+
+def base(request):
+    continent_list = Continent.objects.all()
+    context_dict = {'continents': continent_list}
+    return render (request, 'breakfast/base.html, context_dict')
 
 def home(request):
-    return render(request, 'breakfast/home.html', {})
+    request.session.set_test_cookie()
+    continent_list = Continent.objects.all()
+    recipe_list = Recipe.objects.order_by('-likes')[:5]
+    context_dict = {'continents': continent_list, 'recipes': recipe_list}
+    
+    visitor_cookie_handler(request)
+    context_dict['visits'] = request.session['visits']
+    response = render(request, 'breakfast/home.html', context_dict)
+    return response
 
 
 def about(request):
@@ -20,9 +58,7 @@ def about(request):
 def contact_us(request):
     return render(request, 'breakfast/contact_us.html', {})
 
-
 def sign_in(request):
-    # return render(request, 'breakfast/sign_in.html', {})
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -32,16 +68,24 @@ def sign_in(request):
                 login(request, user)
                 return HttpResponseRedirect(reverse('home'))
             else:
-                return HttpResponse("Your Breakfast account is disabled.")
+                messages.info(request,'Your Breakfast account is disabled.')
+                return HttpResponseRedirect(reverse('sign_in'))
         else:
-            return HttpResponse("Invalid login details supplied. Please check your username and password!")
+            messages.error(request,'Invalid login details supplied. Please check your username and password!')
+            return HttpResponseRedirect(reverse('sign_in'))
 
     else:
-        return render(request, 'breakfast/login.html', {})
+        return render(request, 'breakfast/sign_in.html', {})
+
+@login_required
+def sign_out(request):
+    logout(request)
+    return HttpResponseRedirect(reverse('home'))
+
+
 
 
 def sign_up(request):
-    # return render(request, 'breakfast/sign_up.html', {})
     registered = False
     if request.method == 'POST':
         user_form = UserForm(data=request.POST)
@@ -57,20 +101,42 @@ def sign_up(request):
             if 'picture' in request.FILES:
                 profile.picture = request.FILES['picture']
                 profile.save()
-                registered = True
-            else:
-                print(user_form.errors, profile_form.errors)
+            registered = True
+            messages.success(request, 'You have sign up successfully!')  
+
+        else:
+            messages.error(request,'User already exists, enter new details')
+            print(user_form.errors, profile_form.errors)
+
+
     else:
         user_form = UserForm()
         profile_form = UserProfileForm()
 
     return render(request,
-                  'breakfast/register.html',
+                  'breakfast/sign_up.html',
                   {'user_form': user_form,
                    'profile_form': profile_form,
                    'registered': registered
                   })
 
+@login_required
+def register_profile(request):
+    form = UserProfileForm()
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, request.FILES)
+        if form.is_valid():
+            user_profile = form.save(commit=False)
+            user_profile.user = request.user
+            user_profile.save()
+            
+            return redirect('home')
+        else:
+            print(form.errors)
+
+    context_dict = {'form':form}
+    
+    return render(request, 'breakfast/profile_registration.html', context_dict)
 
 def some_view(request):
     if not request.user.is_authenticated():
@@ -78,18 +144,36 @@ def some_view(request):
     else:
         return HttpResponse("You are not logged in.")
 
+class BreakfastRegistrationView(RegistrationView):
+    def get_success_url(self, user):
+        return reverse('register_profile')
 
-def my_account(request):
-    return render(request, 'breakfast/my_account.html', {})
-
+@login_required
+def my_account(request, username):
+    try:
+        user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        return redirect('home')
+    
+    userprofile = UserProfile.objects.get_or_create(user=user)[0]
+    form = UserProfileForm({'picture': userprofile.picture})
+    
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, request.FILES, instance=userprofile)
+        if form.is_valid():
+            form.save(commit=True)
+            return redirect('my_account', user.username)
+        else:
+            print(form.errors)
+    
+    return render(request, 'breakfast/my_account.html', {'userprofile': userprofile, 'selecteduser': user, 'form': form})
 
 @login_required
 def user_logout(request):
     logout(request)
     return HttpResponseRedirect(reverse('home'))
 
-
-def continent_page(request, continent_name_slug):
+def show_continent(request, continent_name_slug):
     
     context_dict = {}
 
@@ -97,47 +181,51 @@ def continent_page(request, continent_name_slug):
         continent = Continent.objects.get(slug=continent_name_slug)
         recipe = Recipe.objects.filter(continent=continent)
 
-        context_dict['recipe'] = recipe
+        context_dict['recipes'] = recipe
         context_dict['continent'] = continent
     except Continent.DoesNotExist:
-        context_dict['category'] = None
+        context_dict['continent'] = None
+        context_dict['recipes'] = None
+
+    return render(request, 'breakfast/continent.html', context_dict)
+
+
+
+def show_recipe(request, continent_name_slug, recipe_name_slug):
+
+    context_dict = {}
+
+    try:
+        recipe = Recipe.objects.filter(slug=recipe_name_slug)
+        context_dict['recipe'] = recipe
+        
+    except Recipe.DoesNotExist:
         context_dict['recipe'] = None
+        
+    return render(request, 'breakfast/recipe.html', context_dict)
 
-    return render(request, 'breakfast/continent_page.html', context_dict)
-
-
+@login_required
 def add_recipe(request):
     form = RecipeForm()
     if request.method == 'POST':
-        form = RecipeForm(request.POST)
+        form = RecipeForm(request.POST,request.FILES)
         if form.is_valid():
             form.save(commit=True)
             return home(request)
         else:
             print(form.errors)
-    return render(request, 'breakfast/recipe_page.html', {'form': form})
-
-
-def recipe_page(request, recipe_name_slug):
-
-    context_dict = {}
-
-    try:
-        recipe = Recipe.object.get(slug=recipe_name_slug)
-        continent = Recipe.object.get(continent)
-        description = Recipe.object.get(description)
-        ingredients = Recipe.object.get(ingredients)
-
-        context_dict['recipe'] = recipe
-        context_dict['continent'] = continent
-        context_dict['description'] = description
-        context_dict['ingredients'] = ingredients
-    except Recipe.DoesNotExist:
-        context_dict['recipe'] = None
-        context_dict['continent'] = None
-        context_dict['description'] = None
-        context_dict['ingredients'] = None
-        
-    return render(request, 'breakfast/recipe_page.html', context_dict)
+    return render(request, 'breakfast/add_recipe.html', {'form': form})
    
-
+@login_required
+def like_recipe(request):
+    recipe_id = None
+    if request.method == 'GET':
+        recipe_id = request.GET['recipe_id']
+        likes = 0
+        if recipe_id:
+            recipe = Recipe.objects.get(id=int(recipe_id))
+            if recipe:
+                likes = recipe.likes + 1
+                recipe.likes = likes
+                recipe.save()
+        return HttpResponse(likes)
