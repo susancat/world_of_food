@@ -42,7 +42,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
+    'haystack',
     'breakfast',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    'registration',
 ]
 
 MIDDLEWARE = [
@@ -81,6 +88,7 @@ MEDIA_URL = '/media/'
 
 WSGI_APPLICATION = 'World_Of_Food.wsgi.application'
 
+SEARCH_URL='/search/'
 
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
@@ -92,6 +100,15 @@ DATABASES = {
     }
 }
 
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
+        'PATH': os.path.join(os.path.dirname(__file__), 'woosh_index')
+    }
+}
+
+#triggers real time update/delete of trigger model in search index
+HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
@@ -136,8 +153,22 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
-LOGIN_URL = '/breakfast/login/'
+
+REGISTRATION_OPEN = True
+ACCOUNT_ACTIVATION_DAYS = 7
+REGISTRATION_AUTO_LOGIN = True
+LOGIN_REDIRECT_URL = '/breakfast/'
+LOGIN_URL = '/accounts/login/'
 #Media files
 MEDIA_ROOT= MEDIA_DIR
 MEDIA_URL= '/media/'
 
+AUTHENTICATION_BACKENDS = (
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+)
+
+SITE_ID = 1
+
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False

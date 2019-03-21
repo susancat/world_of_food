@@ -1,0 +1,38 @@
+{% extends 'breakfast/base.html' %} 
+    {% load staticfiles %} 
+        {% block title_block %} 
+            ContinentRecipes 
+        {% endblock %} 
+        
+        {% block body_block %}
+             {% if continent %}
+             <div class="container-fluid">
+                <div>
+                    <h2>{{ continent.name }}</h2>
+                </div>
+                <div class="row">
+                    {% if recipes %} 
+                        {% for recipe in recipes %}
+                            <div id="recipe" class="col-md-3">
+                                <figure id="recipe-box" class="fh5co-card-item image-popup">
+                                    <img src="{{ MEDIA_URL}}{{ recipe.image }}" alt="Image" class="img-responsive">
+                                    <div class="overlay">
+                                        <strong id="recipeDes">{{ recipe.recipe_name }}</strong>
+                                        <p id="recipeDes">{{ recipe.short_description }}</p>
+                                    </div>
+                                </figure>
+                                <div id="recipeLabel">
+                                    <h4>{{ recipe.recipe_name }}</h4>
+                                    <a href="{% url 'show_recipe' continent.slug recipe.slug %}" class="btn btn-primary" role="button">view recipe</a>
+                                </div>
+                            </div>
+                        {% endfor %} 
+                    {% else %}
+                        <strong>No recipes currently in saved.</strong> 
+                    {% endif %} 
+            {% else %}
+                <strong>The specified continent does not exist.</strong> 
+            {% endif %}
+                </div>
+            </div>
+        {% endblock %}

@@ -1,0 +1,80 @@
+{% extends 'breakfast/base.html' %}
+{% load staticfiles %}
+
+{% block title_block %}
+    Recipe
+{% endblock %}
+{% block body_block %}
+<div class="container ">
+        <div class="row">
+        {% if recipe %}
+                {% for recipe in recipe %}
+                <div class="col-lg-12 col-md-12 col-sm-12">
+                        <div id="backButton">
+                                <button onclick="goBack()" class="previous">&laquo;Back to search results</a>
+                        </div>
+                        <div>
+                                <h2>{{ recipe.recipe_name }}</h2>
+                                <br>
+                        </div>
+                        
+                        <div class= "col-lg-4 col-md-4 col-sm-4" > 
+                                <div class="well" id="recipedetails">
+                                        <p></p>
+                                        <img src="{{ MEDIA_URL}}{{ recipe.image }}" alt="Image" class="img-responsive">
+                                        <p></p>
+                                       <!-- <button type="button" class="btn btn-danger><span class="heart fa fa-heart-o" style="font-size:18px;color:red">Add Favourites</span></button> -->
+                                       <button class="btn btn-danger">
+                                        <i class="fa fa-heart"></i>
+                                        <span style="font-size:15px;color:white">Add to Favourites</span>
+                                      </button>
+                                        <p></p>
+                                        <div>
+                                                <strong id="like_count">{{ recipe.likes }}</strong> people like this recipe
+                                                {% if user.is_authenticated %}
+                                                <button id="likes" data-catid="{{category.id}}"
+                                                class="btn btn-primary btn-sm" type="button">
+                                                        Like
+                                                </button>
+                                                {% endif %}
+                                        </div>
+                                        <p></p>
+                                        <a href="#"><span class ="fa fa-star" style="font-size:18px;">Reviews</span></a>
+                                </div>    
+                        </div>
+                        
+                        <div class="col-lg-4 col-md-4 col-sm-4"> 
+                                <div class="well" id="recipedetails">
+                                        <h4>Description</h4>
+                                        {{ recipe.description }}
+                                </div>    
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-4"> 
+                                <div class="well" id="recipedetails">
+                                        <h4>Ingredients</h4>
+                                        {{ recipe.ingredients }}{{ value|linebreaks }}
+                                </div>    
+                        </div>
+                </div>
+                        <div class = "col-lg-12 col-md-12 col-sm-12">
+                                <div class="well" >
+                                        <h4>Instructions</h4>
+                                        {{ recipe.steps }}
+                                </div>    
+                        </div>
+                </div>
+                {% endfor %}
+        {% else %}
+                <strong>No Recipe!</strong>
+        {% endif %}
+        </div>
+       <script src="https://utteranc.es/client.js"
+                repo="[https://github.com/bmoyler/world_of_food.git]"
+                issue-term="pathname"
+                theme="github-light"
+                crossorigin="anonymous"
+                async>
+        </script>
+</div>
+
+{% endblock %}
