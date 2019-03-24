@@ -2,6 +2,8 @@
 <!DOCTYPE html>
 {% load breakfast_template_tags %} 
 {% load staticfiles %}
+
+
 <html> 
     <head>
         <link rel="shortcut icon" type="image/png" href="{% static "images/toastFav.ico" %}"/>
@@ -13,14 +15,19 @@
         </title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
         <link rel="stylesheet" href="{% static "css/style.css" %}">
+        <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+        <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_GB/sdk.js#xfbml=1&version=v3.2"></script>
         <script src="{% static "js/breakfast.js" %}"></script>
-    </head> 
+        <script src="{% static "js/breakfast-ajax.js" %}"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js" integrity="sha384-NaWTHo/8YCBYJ59830LTz/P4aQZK1sS0SneOgAvhsIl3zBu8r9RevNg5lHCHAuQ/" crossorigin="anonymous"></script>
+      </head> 
     <body>
+      <div id="fb-root"></div>
       <nav class="navbar navbar-inverse">
         <div class="container-fluid">          
           <div class="navbar-header">
@@ -29,14 +36,13 @@
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>                        
             </button>
-            <!--<img id="toastLogo"class="pull-left" src="{% static "images/toast.png" %}" href="{% url 'home' %}">-->
             <a class="navbar-brand" id="siteTitle"><strong>World of Breakfast</strong></a>
           </div>
           <div class="collapse navbar-collapse" id="myNavbar">
             <ul class="nav navbar-nav">
               <li class="#"><a href="{% url 'home' %}"><strong>Home</strong></a></li>
               <li><a href="{% url 'about' %}"><strong>About</strong></a></li>
-              <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#"><strong>Continents</strong><span class="caret"></span></a>
+              <li><a class="dropdown-toggle" data-toggle="dropdown" href="#"><strong>Continents</strong><span class="caret" ></span></a>
                 <ul class="dropdown-menu">
                 <!--urls are hard coded here as it was not possible to create a url pattern for base whos scope was all project urls-->
                 <!--but continent names are unlikely to change any time soon, so this is acceptable-->
@@ -51,7 +57,6 @@
               </li>
               <li><a href="/search/"><strong>Search Recipes</strong></a></li>
               <li><a href="{% url 'contact_us' %}"><strong>Contact us</strong></a></li>
-              
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 {% if user.is_authenticated %}
@@ -71,9 +76,13 @@
       <div>
         <br> 
       </div>
-      <!-- <footer class="container-fluid text-center">
+      <footer class="container-fluid text-center">
         <p>World of Breakfast</p>
         <p>"Start your day the global way"</p>
-      </footer> -->
+        <div>
+          <span class="fb-like" data-href="https://nobackteeth.com" data-layout="button" data-action="recommend" data-size="small" data-show-faces="false" data-share="false"></span>
+          <a href="https://twitter.com/share?ref_src=twsrc%5Etfw" class="twitter-share-button" data-show-count="false">Tweet</a>
+        </div>
+      </footer>
     </body> 
 </html>
